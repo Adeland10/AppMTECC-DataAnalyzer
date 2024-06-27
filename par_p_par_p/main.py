@@ -9,7 +9,7 @@ from tkinter_display import show_dataframe
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
-filepath = r'C:\Users\adele\Bureau\INEM\Code\HNE PredictCFdec162k p1+3F508del and CastanierSoleneWT p1+3 and no cells in 5 6 20 06 24_comp.xlsx'
+filepath = r'C:\Users\adele\Bureau\INEM\Code-MTECC\HNE PredictCFdec162k p1+3F508del and CastanierSoleneWT p1+3 and no cells in 5 6 20 06 24_comp.xlsx'
 sheet= 'HNE PredictCFdec162k p1+3F508de'
 df = pd.read_excel(filepath, sheet)
 #print("fichier loaded") #vérif
