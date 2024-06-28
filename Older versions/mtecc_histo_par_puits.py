@@ -32,7 +32,7 @@ def calculate_means(df):
     for marker, group in grouped:
         # Sélect 10 dernières lignes/valeurs pour chaque marqueur
         last_10_rows = group.tail(10)
-        print(last_10_rows) # Verif 10 dernières valeurs de GT, Ieq, Iraw, PD, RT pour chaque marker
+        #print(last_10_rows) # Verif 10 dernières valeurs de GT, Ieq, Iraw, PD, RT pour chaque marker
         
         # Calcul moyennes pour les colonnes GT, Ieq, Iraw, PD, RT  
         means_dict[marker] = {
@@ -46,7 +46,7 @@ def calculate_means(df):
     return pd.DataFrame(means_dict).T  # .T --> transposition, plus facile à lire
 
 #-------------------------------------------------------------------------------------------------
-# Fonction pour calculer les deltas entre les marqueurs successifs de chaque puit
+# Fonction pour calculer les deltas entre les marqueurs successifs de chaque puit 
 
 delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
 
@@ -102,8 +102,33 @@ for well, deltas in deltas_par_puits.items():
 """
 
 #-------------------------------------------------------------------------------------------------
-# Représentation des deltas --> Test 1 : HISTOGRAMME pour chaque puits avec GT ieq iraw PD RT sur le même histogramme
+# Fonction pour générer le tableau de valeurs 
 
+def create_delta_table(deltas_par_puits):
+    columns = pd.MultiIndex.from_product(
+        [['GT', 'PD', 'Ieq', 'Iraw', 'RT'], delta_names],
+        names=['Measure', 'Delta']
+    )
+    wells = list(deltas_par_puits.keys())
+    delta_table = pd.DataFrame(index=wells, columns=columns)
+
+    for well, deltas in deltas_par_puits.items():
+        for delta_name, delta_values in deltas.items():
+            for measure, value in delta_values.items():
+                delta_table.loc[well, (measure, delta_name)] = value
+
+    return delta_table
+
+# Générer le tableau de valeurs
+delta_table = create_delta_table(deltas_par_puits)
+
+# Afficher le tableau
+#print(delta_table)
+
+# Optionnel: Sauvegarder le tableau dans un fichier Excel
+delta_table.to_excel('delta_table.xlsx')
+#-------------------------------------------------------------------------------------------------
+# Représentation des deltas --> Test 1 : HISTOGRAMME pour chaque puits avec 5 histogrammes pour chaque puit, un pour chaque mesure
 
 #avec Matplotlib
 """
@@ -137,25 +162,45 @@ def plot_deltas_histograms(deltas_par_puits):
 """
 
 #avec seaborn
-sns.set_style('whitegrid')
+sns.set_style('darkgrid', {'grid.linestyle': '--'})
+colors = sns.color_palette("tab10", 8)
+units = {'GT': 'GT(mSiemens)', 'Ieq': 'Ieq(μA.cm²)', 'Iraw': 'Iraw(μA.cm²)', 'PD': 'PD(μV)', 'RT': 'RT(kΩ.cm²)'}
+measures = ['GT', 'Ieq', 'Iraw', 'PD', 'RT']
 
-for well, deltas in deltas_par_puits.items():
-    plt.figure(figsize=(12, 8))
-    data_list = []
-    for delta_name, delta_values in deltas.items():
-        for key, value in delta_values.items():
-            data_list.append({'Delta': delta_name, 'Type': key, 'Value': value})
+def plot_histo_par_puits(deltas_par_puits):
+    for well, deltas in deltas_par_puits.items():
+        fig, axs = plt.subplots(5, 1, figsize=(10, 15))
+        fig.suptitle(f'Deltas pour le puit {well}', fontsize=16)
+        
+        for i, measure in enumerate(measures):
+            data_list = []
+            for delta_name, delta_values in deltas.items():
+                data_list.append({'Delta': delta_name, 'Value': delta_values[measure]})
+            
+            data = pd.DataFrame(data_list)
+            
+            if not data.empty:
+                sns.histplot(data=data, x='Delta', weights='Value', multiple='dodge', ax=axs[i], color=colors[i])
+                axs[i].set_ylabel(units[measure], fontsize=9)
+                axs[i].set_xlabel('Delta', fontsize=9)
+                axs[i].tick_params(axis='x', rotation=0, labelsize=8)
+        
+        fig.canvas.manager.set_window_title(f"Puits {well}")
+        
+        if well == 'D6':
+            def on_close(event):
+                plt.close('all')  # Ferme toutes les fenêtres
 
-    data = pd.DataFrame(data_list)
-    
-    if not data.empty:
-        sns.histplot(data=data, x='Delta', weights='Value', hue='Type', multiple='dodge', shrink=0.8)
-        plt.title(f'Deltas pour le puit {well}')
-        plt.xlabel('Delta')
-        plt.ylabel('Valeur')
-        plt.xticks(rotation=45)
-plt.show()
+            fig.canvas.mpl_connect('close_event', on_close)
 
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        plt.subplots_adjust(hspace=0.5)
+    plt.show() #bloque jusqu'à ce que la fenêtre se ferme 
+
+plot_histo_par_puits(deltas_par_puits)
 print("Fin du programme.")
+
+
+
 
 

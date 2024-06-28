@@ -1,9 +1,10 @@
 #coding: utf-8
 
 import pandas as pd
-from data_processing import calculate_means, calculate_delta_by_patient
+import matplotlib.pyplot as plt  #pour rep histogramme
+from data_processing import calculate_means
 from plotting import plot_histograms
-from tkinter_display import show_dataframe, prepare_deltas_df
+from delta_calculation import calculate_delta_by_patient #show_dataframe, prepare_deltas_df
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
@@ -28,11 +29,15 @@ deltas_par_patient = calculate_delta_by_patient(df, moyennes)
  #print(pd.DataFrame(deltas_par_patient)) #VERIF
 
  # Préparer le dataframe pour l'affichage dans Tkinter
-deltas_df = prepare_deltas_df(df, deltas_par_patient)
+#deltas_df = prepare_deltas_df(df, deltas_par_patient)
 
+#plt.ion() #mode intéractif ON
 for patient, deltas in deltas_par_patient.items():
     plot_histograms(patient, deltas, df)
 
-show_dataframe(deltas_df)
+#plt.ioff()
+plt.show()
+
+#show_dataframe(deltas_df)
 
 print("Fin du programme.")

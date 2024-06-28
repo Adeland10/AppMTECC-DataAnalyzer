@@ -1,4 +1,5 @@
-import pandas as pd
+#coding: utf-8
+
 
 #-------------------------------------------------------------------------------------------------
 # Fonction pour calculer les moyennes des dernières 
@@ -43,41 +44,3 @@ def group_wells_by_patient(df):
     return grouped_patients
 
 #print(group_wells_by_patient(df)) #VERIFFFF
-
-#-------------------------------------------------------------------------------------------------
-# Fonction pour calculer les deltas entre les marqueurs successifs de chaque puit en les regroupant par patients 
-
-delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
-
-def calculate_delta_by_patient(df, means_dict):
-    patient_wells = group_wells_by_patient(df)
-    all_deltas = {}
-
-    for patient, wells in patient_wells.items():
-        deltas = {delta: {measure: [0] * len(wells) for measure in ['GT', 'Ieq', 'Iraw', 'PD', 'RT']} for delta in delta_names}
-        for well_index, well in enumerate(wells):
-            if well in means_dict:
-                well_means = means_dict[well]
-                markers = sorted(well_means.keys())
-    
-                for i in range(1, len(markers)):
-                    marker1 = markers[i]
-                    marker0 = markers[i - 1]
-                    delta_name = delta_names[i-1]
-                    
-                    delta_GT = well_means[marker1]['GT'] - well_means[marker0]['GT']
-                    delta_Ieq = well_means[marker1]['Ieq'] - well_means[marker0]['Ieq']
-                    delta_Iraw = well_means[marker1]['Iraw'] - well_means[marker0]['Iraw']
-                    delta_PD = well_means[marker1]['PD'] - well_means[marker0]['PD']
-                    delta_RT = well_means[marker1]['RT'] - well_means[marker0]['RT']
-                    
-                    deltas[delta_name]['GT'][well_index] = delta_GT
-                    deltas[delta_name]['Ieq'][well_index] = delta_Ieq
-                    deltas[delta_name]['Iraw'][well_index] = delta_Iraw
-                    deltas[delta_name]['PD'][well_index] = delta_PD
-                    deltas[delta_name]['RT'][well_index] = delta_RT
-
-        all_deltas[patient] = deltas #stocker les données pour un patient
-    return all_deltas
-
-
