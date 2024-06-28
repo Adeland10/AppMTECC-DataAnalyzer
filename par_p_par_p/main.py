@@ -1,11 +1,9 @@
 #coding: utf-8
 
 import pandas as pd
-import tkinter as tk #(pour ouvrir fenêtre supplémentaire)
-from tkinter import ttk
-from data_processing import calculate_means, calculate_delta_by_patient, group_wells_by_patient
+from data_processing import calculate_means, calculate_delta_by_patient
 from plotting import plot_histograms
-from tkinter_display import show_dataframe
+from tkinter_display import show_dataframe, prepare_deltas_df
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
@@ -20,6 +18,7 @@ df_test=df.head()
 """
 df = df[df['Description'] != 'vide'] # Filtrer les puits non vides
 
+
 # Calculer les moyennes des 10 dernières valeurs par marqueur
 moyennes = calculate_means(df)
 
@@ -28,8 +27,11 @@ deltas_par_patient = calculate_delta_by_patient(df, moyennes)
 #print("Deltas entre les marqueurs successifs pour chaque patient :")
  #print(pd.DataFrame(deltas_par_patient)) #VERIF
 
+ # Préparer le dataframe pour l'affichage dans Tkinter
+deltas_df = prepare_deltas_df(df, deltas_par_patient)
 
-plot_histograms(patient, deltas)
+for patient, deltas in deltas_par_patient.items():
+    plot_histograms(patient, deltas, df)
 
 show_dataframe(deltas_df)
 

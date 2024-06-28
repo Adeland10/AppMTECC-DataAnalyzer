@@ -6,6 +6,7 @@ import pandas as pd
 
 def calculate_means(df):
     means_dict = {}     # Initialisation dictionnaire pour stocker les moyennes des 10 dernières valeurs par colonne et par marqueur
+    grouped = df.groupby(['Well', 'Marker']) # groupby() de pandas pour regrouper par Marker
 
     for (well, marker), group in grouped:
         last_10_rows = group.tail(10)         # Sélect 10 dernières lignes/valeurs pour chaque marqueur
@@ -47,9 +48,9 @@ def group_wells_by_patient(df):
 # Fonction pour calculer les deltas entre les marqueurs successifs de chaque puit en les regroupant par patients 
 
 delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
-patient_wells = group_wells_by_patient(df)
 
 def calculate_delta_by_patient(df, means_dict):
+    patient_wells = group_wells_by_patient(df)
     all_deltas = {}
 
     for patient, wells in patient_wells.items():
