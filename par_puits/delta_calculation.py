@@ -55,6 +55,5 @@ def create_delta_table(deltas_par_puits):
     for well, deltas in deltas_par_puits.items():
         for delta_name, delta_values in deltas.items():
             for measure, value in delta_values.items():
-                delta_table.loc[well, (measure, delta_name)] = value
-
+                delta_table.loc[well, (measure, delta_name)] = round(value, 3)
     return delta_table

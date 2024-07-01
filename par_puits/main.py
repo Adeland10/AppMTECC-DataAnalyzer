@@ -1,6 +1,6 @@
 import pandas as pd
 
-from data_processing import import_data, calculate_means
+from data_processing import calculate_means
 from delta_calculation import calculate_delta_by_well, create_delta_table
 from plotting import plot_histo_par_puits
 

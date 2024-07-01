@@ -1,5 +1,4 @@
 import pandas as pd
-
 from data_processing import group_wells_by_patient
 
 #-------------------------------------------------------------------------------------------------
@@ -76,3 +75,31 @@ def show_dataframe(df):
         tree.insert("", tk.END, values=list(row))
     root.mainloop()
 """
+
+#-------------------------------------------------------------------------------------------------
+# Fonction pour générer un tableau de valeurs des deltas 
+
+def create_delta_table(df, deltas_par_patient):
+    columns = pd.MultiIndex.from_product(
+        [['GT', 'PD', 'Ieq', 'Iraw', 'RT'], ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']],
+        names=['Measure', 'Delta']
+    )
+    index_list = []
+    
+    for patient, wells in group_wells_by_patient(df).items():
+        for well in wells:
+            index_list.append((patient, well))
+    
+    index = pd.MultiIndex.from_tuples(index_list, names=['Patient', 'Well'])
+    
+    delta_table = pd.DataFrame(index=index, columns=columns)
+
+    for patient, deltas in deltas_par_patient.items():
+        wells = group_wells_by_patient(df)[patient]
+        for well_index, well in enumerate(wells):
+            for delta_name, measures in deltas.items():
+                for measure, values in measures.items():
+                    rounded_values = [round(value, 3) for value in values]
+                    delta_table.loc[(patient, well), (measure, delta_name)] = rounded_values[well_index]
+
+    return delta_table
