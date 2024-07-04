@@ -1,105 +1,97 @@
 import pandas as pd
-from data_processing import group_wells_by_patient
+import numpy as np
+
 
 #-------------------------------------------------------------------------------------------------
 # Fonction pour calculer les deltas entre les marqueurs successifs de chaque puit en les regroupant par patients 
 
 delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
 
-def calculate_delta_by_patient(df, means_dict):
-    patient_wells = group_wells_by_patient(df)
+def calculate_delta_by_well(df, means_dict):
     all_deltas = {}
 
-    for patient, wells in patient_wells.items():
-        deltas = {delta: {measure: [0] * len(wells) for measure in ['GT', 'Ieq', 'Iraw', 'PD', 'RT']} for delta in delta_names}
-        for well_index, well in enumerate(wells):
-            if well in means_dict:
-                well_means = means_dict[well]
-                markers = sorted(well_means.keys())
+    for well, markers in means_dict.items():
+        deltas = {}
+        markers_keys = sorted(markers.keys()) #trier marker en ordre croissant pour calculer deltas de manière séquentielle entre les marqueurs
     
-                for i in range(1, len(markers)):
-                    marker1 = markers[i]
-                    marker0 = markers[i - 1]
-                    delta_name = delta_names[i-1]
-                    
-                    delta_GT = well_means[marker1]['GT'] - well_means[marker0]['GT']
-                    delta_Ieq = well_means[marker1]['Ieq'] - well_means[marker0]['Ieq']
-                    delta_Iraw = well_means[marker1]['Iraw'] - well_means[marker0]['Iraw']
-                    delta_PD = well_means[marker1]['PD'] - well_means[marker0]['PD']
-                    delta_RT = well_means[marker1]['RT'] - well_means[marker0]['RT']
-                    
-                    deltas[delta_name]['GT'][well_index] = delta_GT
-                    deltas[delta_name]['Ieq'][well_index] = delta_Ieq
-                    deltas[delta_name]['Iraw'][well_index] = delta_Iraw
-                    deltas[delta_name]['PD'][well_index] = delta_PD
-                    deltas[delta_name]['RT'][well_index] = delta_RT
+        for i in range(1, len(markers_keys)):
+            marker1 = markers_keys[i]
+            marker0 = markers_keys[i - 1]
+            delta_name = delta_names[i - 1]
 
-        all_deltas[patient] = deltas #stocker les données pour un patient
+        # Utiliser les moyennes globales pour calculer les deltas
+            delta_GT = markers[marker1]['GT'] - markers[marker0]['GT']
+            delta_Ieq = markers[marker1]['Ieq'] - markers[marker0]['Ieq']
+            delta_Iraw = markers[marker1]['Iraw'] - markers[marker0]['Iraw']
+            delta_PD = markers[marker1]['PD'] - markers[marker0]['PD']
+            delta_RT = markers[marker1]['RT'] - markers[marker0]['RT']
+            
+            deltas[delta_name] = {
+                'GT': round(delta_GT, 2),
+                'Ieq': round(delta_Ieq, 2),
+                'Iraw': round(delta_Iraw, 2),
+                'PD': round(delta_PD, 2),
+                'RT': round(delta_RT, 2)
+            }
+
+        all_deltas[well] = deltas #stocker les deltas calculés pour un puit
+    
     return all_deltas
 
 
-#-------------------------------------------------------------------------------------------------
-# fonction pour préparation des données pour affichage dans Tkinter
+# Fonction pour calculer les deltas par patient et traitement
 
-"""
-def prepare_deltas_df(df, deltas_par_patient):
-    deltas_list = []
-    for patient, deltas in deltas_par_patient.items():
-        for delta_name, measures in deltas.items():
-            for measure, values in measures.items():
-                for well_index, value in enumerate(values):
-                    deltas_list.append({
-                        'Patient': patient,
-                        'Delta': delta_name,
-                        'Measure': measure,
-                        'Well': group_wells_by_patient(df)[patient][well_index],
-                        'Value': round(value, 3)
-                    })
-    return pd.DataFrame(deltas_list)
+def calculate_deltas_means_by_treatment(df, patient_wells, means_dict):
+    deltas_by_well = calculate_delta_by_well(df, means_dict)
+    aggregated_conditions = {}
 
+    for patient, info in patient_wells.items():
+        wells = info['wells']
+        type_patient = info['type']
+        deltas_by_condition = {}
 
-#-------------------------------------------------------------------------------------------------
-# Fonction pour afficher le DataFrame dans une fenêtre Tkinter
+        for well, condition_chronique, condition_accute in wells:
+            condition_key = (condition_chronique, condition_accute)
+            if condition_key not in deltas_by_condition:
+                deltas_by_condition[condition_key] = {delta: {measure: [] for measure in ['GT', 'Ieq', 'Iraw', 'PD', 'RT']} for delta in delta_names}
 
-def show_dataframe(df):
-    root = tk.Tk()
-    root.title("Deltas DataFrame")
-    frame = ttk.Frame(root, padding=10)
-    frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-    tree = ttk.Treeview(frame, columns=list(df.columns), show='headings')
-    for col in df.columns:
-        tree.heading(col, text=col)
-        tree.column(col, width=200, anchor = 'center')
-    tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-    for index, row in df.iterrows():
-        tree.insert("", tk.END, values=list(row))
-    root.mainloop()
-"""
+            for delta, measures in deltas_by_well[well].items():
+                for measure, value in measures.items():
+                    deltas_by_condition[condition_key][delta][measure].append(value)
+
+        aggregated_conditions[patient] = {}
+        for condition, deltas in deltas_by_condition.items():
+            aggregated_conditions[patient][condition] = {delta: {measure: round(np.mean(values), 2) for measure, values in measures.items()} for delta, measures in deltas.items()}
+    
+    #print(f"Aggregated Conditions: {aggregated_conditions}")  # Debug print
+
+    return aggregated_conditions
 
 #-------------------------------------------------------------------------------------------------
 # Fonction pour générer un tableau de valeurs des deltas 
 
-def create_delta_table(df, deltas_par_patient):
+def create_delta_table(aggregated_conditions):
+    rows = []
+    index = []
+
+    for patient, conditions in aggregated_conditions.items():
+        for (cond1, cond2), deltas in conditions.items():
+            row = []
+            for measure in ['GT', 'PD', 'Ieq', 'Iraw', 'RT']:
+                for delta in delta_names:
+                    if delta in deltas and measure in deltas[delta]:
+                        row.append(deltas[delta][measure])
+                    else:
+                        row.append(np.nan)  # Ajouter une valeur NaN si le delta n'existe pas
+            
+            rows.append(row)
+            index.append((patient, cond1, cond2))
+
     columns = pd.MultiIndex.from_product(
-        [['GT', 'PD', 'Ieq', 'Iraw', 'RT'], ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']],
+        [['GT', 'PD', 'Ieq', 'Iraw', 'RT'], delta_names],
         names=['Measure', 'Delta']
     )
-    index_list = []
-    
-    for patient, wells in group_wells_by_patient(df).items():
-        for well in wells:
-            index_list.append((patient, well))
-    
-    index = pd.MultiIndex.from_tuples(index_list, names=['Patient', 'Well'])
-    
-    delta_table = pd.DataFrame(index=index, columns=columns)
 
-    for patient, deltas in deltas_par_patient.items():
-        wells = group_wells_by_patient(df)[patient]
-        for well_index, well in enumerate(wells):
-            for delta_name, measures in deltas.items():
-                for measure, values in measures.items():
-                    rounded_values = [round(value, 3) for value in values]
-                    delta_table.loc[(patient, well), (measure, delta_name)] = rounded_values[well_index]
-
+    delta_table = pd.DataFrame(rows, index=pd.MultiIndex.from_tuples(index, names=['Patient', 'Condition1', 'Condition2']), columns=columns)
     return delta_table
+
