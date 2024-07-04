@@ -63,7 +63,7 @@ def calculate_deltas_means_by_treatment(df, patient_wells, means_dict):
         aggregated_conditions[patient] = {}
         for condition, deltas in deltas_by_condition.items():
             aggregated_conditions[patient][condition] = {delta: {measure: round(np.mean(values), 2) for measure, values in measures.items()} for delta, measures in deltas.items()}
-    
+
     return aggregated_conditions
 
 
