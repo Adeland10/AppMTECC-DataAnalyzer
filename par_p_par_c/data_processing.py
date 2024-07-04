@@ -40,20 +40,6 @@ def parse_description(description):
     condition_accute = parts[3] if len(parts) > 3 else None
     return type_patient, patient_name, condition_chronique, condition_accute
 
-"""
-#on identifie les patients et attribue un ID
-def identify_patients(descriptions):
-    patient_dict = {}
-    patient_id = 1
-
-    for desc in descriptions:
-        _, patient_name, _, _ = parse_description(desc)
-        if patient_name not in patient_dict:
-            patient_dict[patient_name] = patient_id
-            patient_id += 1
-
-    return patient_dict
-"""
 #-------------------------------------------------------------------------------------------------
 # Fonction pour regrouper les puits par patient
 def group_wells_by_patient(df):
