@@ -28,11 +28,11 @@ def calculate_delta_by_well(df, means_df):
             delta_RT = means_df.loc[marker1]['RT'] - means_df.loc[marker0]['RT']
             
             deltas[delta_name] = {
-                'GT': delta_GT,
-                'Ieq': delta_Ieq,
-                'Iraw': delta_Iraw,
-                'PD': delta_PD,
-                'RT': delta_RT
+                'GT': round(delta_GT, 3),
+                'Ieq': round(delta_Ieq, 3),
+                'Iraw': round(delta_Iraw, 3),
+                'PD': round(delta_PD, 3),
+                'RT': round(delta_RT, 3)
             }
             delta_index += 1
 
@@ -45,15 +45,31 @@ def calculate_delta_by_well(df, means_df):
 
 def create_delta_table(deltas_par_puits):
     delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
+    calculated_delta_names = ['ΔFsk + ΔVX770', 'ΔFsk + ΔVX770 + ΔApi']
+    measures = ['GT', 'PD', 'Ieq', 'Iraw', 'RT']
+
     columns = pd.MultiIndex.from_product(
-        [['GT', 'PD', 'Ieq', 'Iraw', 'RT'], delta_names],
+        [measures, delta_names + calculated_delta_names],
         names=['Measure', 'Delta']
     )
     wells = list(deltas_par_puits.keys())
     delta_table = pd.DataFrame(index=wells, columns=columns)
 
     for well, deltas in deltas_par_puits.items():
-        for delta_name, delta_values in deltas.items():
-            for measure, value in delta_values.items():
-                delta_table.loc[well, (measure, delta_name)] = round(value, 3)
+        for measure in measures:
+            for delta_name in delta_names:
+                value = deltas.get(delta_name, {}).get(measure, pd.NA)
+                delta_table.loc[well, (measure, delta_name)] = value
+
+            delta_fsk = deltas.get('ΔFsk/IBMX', {}).get(measure, pd.NA)
+            delta_vx770 = deltas.get('ΔVX770', {}).get(measure, pd.NA)
+            delta_api = deltas.get('ΔApi', {}).get(measure, pd.NA)
+            
+            delta_fsk_vx770 = delta_fsk + delta_vx770 if pd.notna(delta_fsk) and pd.notna(delta_vx770) else pd.NA
+            delta_fsk_vx770_api = delta_fsk_vx770 + delta_api if pd.notna(delta_fsk_vx770) and pd.notna(delta_api) else pd.NA
+            
+            # Assign calculated deltas to delta_table
+            delta_table.loc[well, (measure, 'ΔFsk + ΔVX770')] = delta_fsk_vx770
+            delta_table.loc[well, (measure, 'ΔFsk + ΔVX770 + ΔApi')] = delta_fsk_vx770_api
+                
     return delta_table

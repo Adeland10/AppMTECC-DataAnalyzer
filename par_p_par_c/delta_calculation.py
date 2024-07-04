@@ -27,11 +27,11 @@ def calculate_delta_by_well(df, means_dict):
             delta_RT = markers[marker1]['RT'] - markers[marker0]['RT']
             
             deltas[delta_name] = {
-                'GT': round(delta_GT, 2),
-                'Ieq': round(delta_Ieq, 2),
-                'Iraw': round(delta_Iraw, 2),
-                'PD': round(delta_PD, 2),
-                'RT': round(delta_RT, 2)
+                'GT': round(delta_GT, 3),
+                'Ieq': round(delta_Ieq, 3),
+                'Iraw': round(delta_Iraw, 3),
+                'PD': round(delta_PD, 3),
+                'RT': round(delta_RT, 3)
             }
 
         all_deltas[well] = deltas #stocker les deltas calculés pour un puit
