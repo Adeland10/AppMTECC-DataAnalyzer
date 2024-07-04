@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt  #pour rep histogramme
 from data_processing import calculate_means, parse_description, group_wells_by_patient
 from plotting import plot_histograms
-from delta_calculation import calculate_deltas_means_by_treatment, calculate_delta_by_well, create_delta_table #show_dataframe, prepare_deltas_df
+from delta_calculation import calculate_deltas_means_by_treatment, calculate_delta_by_well, create_delta_tables #show_dataframe, prepare_deltas_df
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
@@ -33,11 +33,16 @@ grouped_wells = group_wells_by_patient(df)
 aggregated_conditions = calculate_deltas_means_by_treatment(df, grouped_wells, moyennes)
 
  # Générer le tableau de valeurs des deltas
-delta_table = create_delta_table(aggregated_conditions)
-delta_table.to_excel('delta_table.xlsx')
+delta_table_base, delta_table_calculated = create_delta_tables(aggregated_conditions)
+
+# Save the delta tables to the same Excel file but on different sheets
+with pd.ExcelWriter('delta_tables.xlsx') as writer:
+    delta_table_base.to_excel(writer, sheet_name='Base Deltas')
+    delta_table_calculated.to_excel(writer, sheet_name='Calculated Deltas')
 
 
 #plt.ion() #mode intéractif ON
+
 for patient, deltas in aggregated_conditions.items():
     plot_histograms(patient, deltas, df)
 

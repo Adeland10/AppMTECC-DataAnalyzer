@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt  #pour rep histogramme
+import numpy as np
 
 
 #avec seaborn
@@ -35,6 +36,26 @@ def plot_histograms(patient, deltas, df):
                         print(f"Warning: Measure '{measure}' not found in delta_values")
                 else:
                     print(f"Warning: delta_values is not a dictionary, skipping")
+        
+        # Add calculated deltas
+            delta_fsk = condition_deltas.get('ΔFsk/IBMX', {}).get(measure, np.nan)
+            delta_vx770 = condition_deltas.get('ΔVX770', {}).get(measure, np.nan)
+            delta_api = condition_deltas.get('ΔApi', {}).get(measure, np.nan)
+            
+            delta_fsk_vx770 = np.nan if np.isnan(delta_fsk) or np.isnan(delta_vx770) else delta_fsk + delta_vx770
+            delta_fsk_vx770_api = np.nan if np.isnan(delta_fsk_vx770) or np.isnan(delta_api) else delta_fsk_vx770 + delta_api
+            
+            data_list.append({
+                'Delta': 'ΔFsk + ΔVX770',
+                'Condition': f"{condition[0]}_{condition[1]}",
+                'Value': delta_fsk_vx770
+            })
+            data_list.append({
+                'Delta': 'ΔFsk + ΔVX770 + ΔApi',
+                'Condition': f"{condition[0]}_{condition[1]}",
+                'Value': delta_fsk_vx770_api
+            })
+        
         if data_list:
             data = pd.DataFrame(data_list)
             sns.barplot(data=data, x='Delta', y='Value', hue='Condition', ax=axs[i], palette=colors)
