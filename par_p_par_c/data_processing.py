@@ -1,5 +1,8 @@
 #coding: utf-8
 
+import pandas as pd
+
+
 
 #-------------------------------------------------------------------------------------------------
 # Fonction pour calculer les moyennes des dernières 
@@ -26,21 +29,26 @@ def calculate_means(df):
 
     return means_dict 
 
+#-------------------------------------------------------------------------------------------------
+# Fonction pour analyser la colonne description 
+
+def parse_description(description):
+    parts = description.split('_')
+    type_patient = parts[0]
+    patient_name = parts[1]
+    condition_chronique = parts[2] if len(parts) > 2 else None
+    condition_accute = parts[3] if len(parts) > 3 else None
+    return type_patient, patient_name, condition_chronique, condition_accute
 
 #-------------------------------------------------------------------------------------------------
 # Fonction pour regrouper les puits par patient
-
 def group_wells_by_patient(df):
-    patient_wells = {1: ['A1', 'B1', 'A2', 'B2', 'C1', 'C2', 'D1', 'D2'],
-                     2: ['A3', 'A4', 'B3', 'B4', 'C3', 'C4', 'D3', 'D4'],
-                     3: ['A5', 'A6', 'B5', 'B6', 'C5', 'C6', 'D5', 'D6']}
+    patient_wells = {}
+    for well, desc in zip(df['Well'], df['Description']):
+        type_patient, patient_name, condition_chronique, condition_accute = parse_description(desc)
+        if patient_name not in patient_wells:
+            patient_wells[patient_name] = {'type': type_patient, 'wells': []}
+        patient_wells[patient_name]['wells'].append((well, condition_chronique, condition_accute))
+    return patient_wells
 
-    grouped_patients = {}
-    for patient, wells in patient_wells.items():
-        valid_wells = [well for well in wells if well in df['Well'].values]
-        if valid_wells:
-            grouped_patients[patient] = valid_wells
 
-    return grouped_patients
-
-#print(group_wells_by_patient(df)) #VERIFFFF
