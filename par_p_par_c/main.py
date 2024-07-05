@@ -2,9 +2,11 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt  #pour rep histogramme
-from data_processing import calculate_means, parse_description, group_wells_by_patient
+from data_processing import calculate_means, group_wells_by_patient
 from plotting import plot_histograms
-from delta_calculation import calculate_deltas_means_by_treatment, calculate_delta_by_well, create_delta_tables #show_dataframe, prepare_deltas_df
+from delta_calculation import calculate_deltas_means_by_treatment #show_dataframe, prepare_deltas_df
+from table import create_delta_tables
+
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
