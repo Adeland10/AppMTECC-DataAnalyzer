@@ -11,7 +11,7 @@ from openpyxl.utils import get_column_letter
 def table_delta_base(aggregated_conditions):
     rows_base = []
     index = []
-    delta_names = ['ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
+    delta_names = ['Basal', 'ΔAmi', 'ΔFsk/IBMX', 'ΔVX770', 'ΔApi', 'ΔInh', 'ΔATP']
     measures = ['GT', 'PD', 'Ieq', 'Iraw', 'RT']
 
     for patient, conditions in aggregated_conditions.items():
@@ -19,10 +19,14 @@ def table_delta_base(aggregated_conditions):
             row_base = []
             for measure in measures:
                 for delta in delta_names:
-                    if delta in deltas and measure in deltas[delta]:
-                        row_base.append(deltas[delta][measure])
+                    if delta == 'Basal':
+                        # Assuming 'Basal' values are directly stored under a specific key in deltas
+                        basal_value = deltas.get('Basal', {}).get(measure, np.nan)
+                        row_base.append(basal_value)
                     else:
-                        row_base.append(np.nan)  # Add NaN if the delta does not exist
+                        # Append delta values if available, otherwise append NaN
+                        value = deltas.get(delta, {}).get(measure, np.nan)
+                        row_base.append(value)
             rows_base.append(row_base)
             index.append((patient, cond1, cond2))
 

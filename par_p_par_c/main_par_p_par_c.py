@@ -11,7 +11,7 @@ from table import table_delta_base, table_delta_calculated, adjust_column_width
 
 #-------------------------------------------------------------------------------------------------
 #importation du fichier excel et de la fenêtre contenant les raw data
-#filepath = r'C:\Users\adele\Bureau\INEM\CODE\Code-MTECC\HNE Da Silva Ferreira Chloe p1+3 and Christofoli Regis p1+3 and Gualtieri Mathis p1+3 ctrl ETI 12 07 24_comp.xlsx'
+filepath = r'C:\Users\adele\Bureau\INEM\CODE\Code-MTECC\ReadyToAnalyze\HNE Da Silva Ferreira Chloe p1+3 and Christofoli Regis p1+3 and Gualtieri Mathis p1+3 ctrl ETI 12 07 24_comp.xlsx'
 #sheet= 'HNE PredictCFdec162k p1+3F508de'
 df = pd.read_excel(filepath)
 #print("fichier loaded") #vérif

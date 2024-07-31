@@ -23,7 +23,8 @@ def plot_histograms(patient, deltas, df):
             for delta_name, delta_values in condition_deltas.items():
                 #print(f"Measure: {measure}")
                 #print(f"Delta Values: {delta_values}")
-
+                if delta_name == 'Basal':
+                    continue  # Skip 'Basal' entries
             
                 if isinstance(delta_values, dict) :
                     if measure in delta_values:
