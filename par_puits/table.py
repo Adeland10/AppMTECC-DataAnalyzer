@@ -10,8 +10,10 @@ def create_delta_table(deltas_par_puits):
     calculated_delta_names = ['ΔFsk + ΔVX770', 'ΔFsk + ΔVX770 + ΔApi']
     measures = ['GT', 'PD', 'Ieq', 'Iraw', 'RT']
 
+    all_delta_names = ['Basal'] + delta_names + calculated_delta_names
+
     columns = pd.MultiIndex.from_product(
-        [measures, delta_names + calculated_delta_names],
+        [measures, all_delta_names],
         names=['Measure', 'Delta']
     )
     wells = list(deltas_par_puits.keys())
@@ -19,6 +21,15 @@ def create_delta_table(deltas_par_puits):
 
     for well, deltas in deltas_par_puits.items():
         for measure in measures:
+
+            basal_value = deltas.get('Basal', {}).get(measure, pd.NA)
+            if isinstance(basal_value, pd.Series):
+                basal_value = basal_value.iloc[0] 
+                
+            if pd.isna(basal_value):
+                basal_value = pd.NA  # Handle missing basal values
+            delta_table.loc[well, (measure, 'Basal')] = basal_value
+
             for delta_name in delta_names:
                 value = deltas.get(delta_name, {}).get(measure, pd.NA)
                 delta_table.loc[well, (measure, delta_name)] = value
@@ -35,3 +46,4 @@ def create_delta_table(deltas_par_puits):
             delta_table.loc[well, (measure, 'ΔFsk + ΔVX770 + ΔApi')] = delta_fsk_vx770_api
                 
     return delta_table
+
