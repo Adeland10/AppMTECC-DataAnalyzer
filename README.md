@@ -1,11 +1,11 @@
-# Application MTECC Data Analyzer
+# Guide application MTECC Data Analyzer
 
 ## Introduction
 Cette application est conçue pour [Description de l'application].
 
 ## Installation
-1. Télécharger le dossier compressé `Distribution.zip`.
-2. Extrayez le dossier compressé `Distribution.zip`.
+1. Télécharger le dossier compressé `downloadMe.zip`.
+2. Extrayez le dossier compressé `downloadMe.zip`.
 3. Ouvrez le dossier extrait.
 
 ## Utilisation
@@ -18,7 +18,7 @@ Cette application est conçue pour [Description de l'application].
 7. Attendez le message de confirmation et cliquez sur `OK`.
 8. Vérifiez la sauvegarde des données générées dans le dossier de sortie que vous avez renseigné.
 
-NOTE : - Transformer le fichier `.dcd` de la MTECC en fichier `.csv` en utilisant l'application `MTECC24 DCD to csv2`.
+NOTE : - Transformer le fichier `.dcd` de la MTECC en fichier `.csv` en utilisant l'application `MTECC24 DCD to csv2` en       suivant la légende du fichier `Légende - Plan de plaque MTECC.xlsx `.
        - Utiliser l'application Excel pour transformer le fichier `.csv` en fichier `.xlsx` 
        - voir fiche d'instruction MTECC Data Analyzer
 
