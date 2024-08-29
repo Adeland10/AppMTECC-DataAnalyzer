@@ -3,10 +3,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt  #pour rep histogramme
 
-from data_processing import calculate_means, group_wells_by_patient
-from plotting import plot_histograms
-from delta_calculation import calculate_deltas_means_by_treatment
-from table import table_delta_base, table_delta_calculated, adjust_column_width
+from data_processing_par_p_par_c import calculate_means, group_wells_by_patient
+from plotting_par_p_par_c import plot_histograms
+from delta_calculation_par_p_par_c import calculate_deltas_means_by_treatment
+from table_par_p_par_c import table_delta_base, table_delta_calculated, adjust_column_width
 
 
 #-------------------------------------------------------------------------------------------------
