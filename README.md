@@ -4,8 +4,8 @@
 Cette application est conçue pour [Description de l'application].
 
 ## Installation
-1. Télécharger le dossier compressé `downloadMe.zip`.
-2. Extrayez le dossier compressé `downloadMe.zip`.
+1. Télécharger le dossier compressé `Distribution.zip`.
+2. Extrayez le dossier compressé `Distribution.zip`.
 3. Ouvrez le dossier extrait.
 
 ## Utilisation
